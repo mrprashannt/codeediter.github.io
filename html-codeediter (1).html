@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Real-Time Editor with Autocomplete</title>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.min.css"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
+
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+      }
+
+      .container textarea {
+        background-color: #121212;
+        border: 1px solid #0dddf0;
+        resize: none;
+        width: 100%;
+        height: 33.333%;
+        font-size: 1.4rem;
+        padding: 10px;
+        resize: vertical;
+        overflow-y: scroll;
+        color: white;
+      }
+
+      .container textarea:focus {
+        outline: none;
+        color: white;
+      }
+
+      .preview-container {
+        background: white;
+        width: 50%;
+        height: 100vh;
+        margin: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #viewer {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      .split {
+        width: 50%;
+        height: 100%;
+      }
+
+      .gutter {
+        cursor: e-resize;
+        height: 100%;
+        background: grey;
+      }
+
+      .gutter.gutter-horizontal {
+        cursor: ew-resize;
+      }
+
+      marquee {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: #ffffff;
+        color: #00a2b1;
+        font-size: 2;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 60%;
+        margin: 10% auto;
+      }
+
+      .close {
+        float: right;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        color: red;
+      }
+
+      .column {
+        float: left;
+        width: 33.3%;
+        margin-bottom: 16px;
+        padding: 0 8px;
+      }
+
+      .card {
+        margin: 8px;
+      }
+
+      .container {
+        padding: 0 16px;
+      }
+
+      .container::after,
+      .row::after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+
+      .button {
+        border: none;
+        outline: 0;
+        display: inline-block;
+        padding: 8px;
+        color: white;
+        background-color: #000;
+        text-align: center;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+      }
+
+      html {
+        box-sizing: border-box;
+      }
+
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+
+      @media screen and (max-width: 650px) {
+        .column {
+          width: 100%;
+          display: block;
+        }
+      }
+
+      img {
+        border-radius: 50%;
+      }
+
+      .rams {
+        gap: 5px;
+        background-attachment: fixed;
+        background-color: rgba(255, 255, 255, 0.927);
+        border: radius 0svi;
+      }
+
+      #openModalBtn {
+        background-attachment: fixed;
+        background-color: rgb(246, 245, 241), red;
+      }
+
+      .theme-first {
+        background-attachment: fixed;
+        background-color: black;
+      }
+
+      .theme-sound {
+        background-attachment: fixed;
+        background-color: rgb(255, 9, 9);
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="openModalBtn">💠</button>
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <div class="about-section">
+          <center>
+            <h1>About Us Page</h1>
+            <p>Some text about who we are and what we do.</p>
+            <p>
+              Resize the browser window to see that this page is responsive by
+              the way.
+            </p>
+          </center>
+
+          <button id="lightThemeButton">
+            <iconify-icon icon="entypo:light-up" width="20"></iconify-icon>
+          </button>
+          <button id="darkThemeButton">
+            <iconify-icon
+              icon="iconamoon:mode-dark-fill"
+              width="20"
+            ></iconify-icon>
+          </button>
+        </div>
+
+        <h2 style="text-align: center">Our Team</h2>
+        <div class="row">
+          <div class="column">
+            <center>
+              <div class="card">
+                <img
+                  src="https://uniim1.shutterfly.com/render/00-q9qGOrlhkNm0mBLeymu9gIek9cVUXh4IdI83xvh6V3Ww9YBlPKhHhj0juXv61hYXldMTLfbtJ__wYVBQ_4iTow?cn=THISLIFE&res=small&ts=1691584086"
+                  alt="Jane"
+                  style="width: 200px"
+                />
+                <div class="container">
+                  <ul class="rams">
+                    <h2>Prashant</h2>
+                    <p>Software Engineer</p>
+                    <a href="https://www.instagram.com/spdf7095"
+                      ><iconify-icon
+                        icon="skill-icons:instagram"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="mailto:prashantiloveyou77@gmail.com"
+                      ><iconify-icon
+                        icon="logos:google-gmail"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://wa.link/yj9xzg"
+                      ><iconify-icon
+                        icon="logos:whatsapp-icon"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://www.facebook.com/spdf7095/"
+                      ><iconify-icon
+                        icon="logos:facebook"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://www.twitter.com/spdf7095/"
+                      ><iconify-icon
+                        icon="logos:twitter"
+                        width="30"
+                      ></iconify-icon></a
+                    ><br />
+                    <br />
+                    <b>CEO Founder</b>
+                  </ul>
+                </div>
+              </div>
+            </center>
+          </div>
+          <div class="column">
+            <center>
+              <div class="card">
+                <img
+                  src="https://uniim1.shutterfly.com/render/00-q9qGOrlhkNm0mBLeymu9gIek9cVUXh4IdI83xvh6V3X2FZ_C7sa_7LceQ80HnFa04xJ2Twu75QF_jizMkB1ZdA?cn=THISLIFE&res=small&ts=1691605419"
+                  alt="Jane"
+                  style="width: 200px"
+                />
+                <div class="container">
+                  <ul class="rams">
+                    <h2>Kapil Yadav</h2>
+                    <p>Web Developer</p>
+                    <a href="https://www.instagram.com/spdf7095"
+                      ><iconify-icon
+                        icon="skill-icons:instagram"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="mailto:prashantiloveyou77@gmail.com"
+                      ><iconify-icon
+                        icon="logos:google-gmail"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://wa.link/7prvpg"
+                      ><iconify-icon
+                        icon="logos:whatsapp-icon"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://www.facebook.com/spdf7095/"
+                      ><iconify-icon
+                        icon="logos:facebook"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://www.twitter.com/spdf7095/"
+                      ><iconify-icon
+                        icon="logos:twitter"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <br />
+                    <br />
+
+                    <b>Web Designer</b>
+                  </ul>
+                </div>
+              </div>
+            </center>
+          </div>
+          <div class="column">
+            <center>
+              <div class="card">
+                <img
+                  src="https://uniim1.shutterfly.com/render/00-q9qGOrlhkNm0mBLeymu9gIek9cVUXh4IdI83xvh6V3VC2C-98dVnhLIsUX87X9NTUnDnu4gHHWpfyYq5WwzmNg?cn=THISLIFE&res=small&ts=1691604415"
+                  alt="Jane"
+                  style="width: 190px"
+                />
+                <div class="container">
+                  <ul class="rams">
+                    <h2>Swati</h2>
+                    <p>Web Developer</p>
+                    <a href="https://www.instagram.com/spdf7095"
+                      ><iconify-icon
+                        icon="skill-icons:instagram"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="mailto:prashantiloveyou77@gmail.com"
+                      ><iconify-icon
+                        icon="logos:google-gmail"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://wa.link/1yyr1w"
+                      ><iconify-icon
+                        icon="logos:whatsapp-icon"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://www.facebook.com/spdf7095/"
+                      ><iconify-icon
+                        icon="logos:facebook"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <a href="https://www.twitter.com/spdf7095/"
+                      ><iconify-icon
+                        icon="logos:twitter"
+                        width="30"
+                      ></iconify-icon
+                    ></a>
+                    <br />
+                    <br />
+
+                    <b>Consultant</b>
+                  </ul>
+                </div>
+              </div>
+            </center>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container split">
+      <div id="htmlEditor" style="height: 33%"></div>
+      <br />
+      <div id="cssEditor" style="height: 33%"></div>
+      <br />
+      <div id="javascriptEditor" style="height: 33%"></div>
+    </div>
+
+    <div class="preview-container">
+      <iframe id="viewer"></iframe>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.js"></script>
+    <script>
+      require.config({
+        paths: {
+          vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs",
+        },
+      });
+      require(["vs/editor/editor.main"], function () {
+        // Create HTML editor
+        var htmlEditor = monaco.editor.create(
+          document.getElementById("htmlEditor"),
+          {
+            value:
+              '<!DOCTYPE html>\n <html lang = "en">\n <head>\n <meta charset = "UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Document</title>\n</head>\n <body>\n\n</body>\n</html > ',
+            language: "html",
+            theme: "vs-dark",
+          }
+        );
+
+        monaco.languages.registerCompletionItemProvider("html", {
+          provideCompletionItems: function (model, position) {
+            return {
+              suggestions: [
+                {
+                  label: "div",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: "<div></div>",
+                  documentation: "Create a new <div> element",
+                },
+                {
+                  label: "span",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: "<span></span>",
+                  documentation: "Create a new <span> element",
+                },
+                {
+                  label: "p",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: '<p class=" "> </p>',
+                  documentation: "Create a new <p> element",
+                },
+                {
+                  label: "h1",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: "<h1> </h1>",
+                  documentation: "Create a new <h1> element",
+                },
+                {
+                  label: "textarea",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText:
+                    '<textarea type="text" placeholder="">,\n <textarea type="text" placeholder="">',
+                  documentation: "Create a new <textarea> element",
+                },
+
+                {
+                  label: "button",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: '<button id=""> </button>',
+                  documentation: "Create a new <button> element",
+                },
+
+                {
+                  label: "video",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText:
+                    '<video width="200" height="150" controls>\n<source src="vid.mp4" type="video/mp4">\n<source src="vid.ogg" type="video/ogg">\nNo video support.\n</video>',
+                  documentation: "Create a new <video> element",
+                },
+                {
+                  label: "audio",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText:
+                    '<audio controls>\n<source src="sound.ogg" type="audio/ogg">\n<source src="sound.mp3" type="audio/mpeg">\nNo audio support.\n</audio>',
+                  documentation: "Create a new <audio> element",
+                },
+
+                {
+                  label: "dir",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: "<dir> </dir>",
+                  documentation: "Create a new <dir> element",
+                },
+                {
+                  label: "a",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: '<a href=""> </a>',
+                  documentation: "Create a new <a> element",
+                },
+                {
+                  label: "img",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText:
+                    '<img src=" " alt="description" height="100" width="100" longdesc="desc.txt" />',
+                  documentation: "Create a new <img> element",
+                },
+                {
+                  label: "br",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText: "<br>",
+                  documentation: "Create a new <br> element",
+                },
+
+                {
+                  label: "option",
+                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  insertText:
+                    '<form method=post action="/cgibin/example.cgi">\n<center>\nSelect an option:\n<select>\n<option>option 1</option>\n<option selected>option 2</option>\n<option>option 3</option>\n<option>option 4</option>\n<option>option 5</option>\n<option>option 6</option>\n</select><br>\n<input type="Submit" value="Submit">\n</center>\n</form>',
+                  documentation: "Create a new <option> element",
+                },
+              ],
+            };
+          },
+        });
+
+        // Create CSS editor
+        var cssEditor = monaco.editor.create(
+          document.getElementById("cssEditor"),
+          {
+            value:
+              "* {\n      padding: 0;margin: 0;\n      box-sizing: border-box;\n}\nbody {\n      height: 100vh;\n      display: flex; \n}",
+            language: "css",
+          }
+        );
+
+        // Create JavaScript editor
+        var javascriptEditor = monaco.editor.create(
+          document.getElementById("javascriptEditor"),
+          {
+            value: "",
+            language: "javascript",
+          }
+        );
+
+        function updatePreview() {
+          let htmlCode = htmlEditor.getValue();
+          let cssCode = cssEditor.getValue();
+          let javascriptCode = javascriptEditor.getValue();
+          let text =
+            htmlCode +
+            "<style>" +
+            cssCode +
+            "</style>" +
+            "<scri" +
+            "pt>" +
+            javascriptCode +
+            "</scri" +
+            "pt>";
+          let iframe = document.getElementById("viewer").contentWindow.document;
+          iframe.open();
+          iframe.write(text);
+          iframe.close();
+        }
+
+        // Bind the updatePreview function to editor changes
+        htmlEditor.onDidChangeModelContent(updatePreview);
+        cssEditor.onDidChangeModelContent(updatePreview);
+        javascriptEditor.onDidChangeModelContent(updatePreview);
+        var lightThemeButton = document.getElementById("lightThemeButton");
+        var darkThemeButton = document.getElementById("darkThemeButton");
+      });
+    </script>
+    <script>
+      lightThemeButton.addEventListener("click", function () {
+        monaco.editor.setTheme("vs");
+      });
+
+      darkThemeButton.addEventListener("click", function () {
+        monaco.editor.setTheme("vs-dark");
+      });
+      const openModalBtn = document.getElementById("openModalBtn");
+      const modal = document.getElementById("modal");
+      const closeModal = document.getElementById("closeModal");
+
+      openModalBtn.addEventListener("click", () => {
+        modal.style.display = "block";
+      });
+
+      closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+
+      function pauseModal() {
+        modal.style.pointerEvents = "none";
+      }
+
+      function resumeModal() {
+        modal.style.pointerEvents = "auto";
+      }
+    </script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  </body>
+</html>
